@@ -29,3 +29,10 @@ jobs:
           start: npm run start-prod
           wait-on: http://localhost:5000
           headless: true
+      - name: Deploy to Render
+        uses: JorgeLNJunior/render-deploy@v1.3.2
+        with:
+          service_id: ${{ secrets.RENDER_SERVICE_ID }} # required
+          api_key: ${{ secrets.RENDER_API_KEY }} # required
+          clear_cache: false # Clear build cache. Optional
+          wait_deploy: true # Wait until the deploy status is successful. Warning! Free Render services can take +5 minutes to be fully deployed. Optional
