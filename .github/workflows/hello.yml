@@ -9,5 +9,11 @@ jobs:
       - name: Say hello
         run: |
           echo "Hello World!"
+      - name: Now it is
+        run: |
+          date
+      - name: Directory content
+        run: |
+          ls -l
     runs-on: ubuntu-latest
       
