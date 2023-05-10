@@ -33,14 +33,17 @@ jobs:
           node-version: '16'
       - name: Install dependencies
         run: npm install && npm install --save-dev cypress
-        
       - name: Check style
+        id: lint
         run: npm run eslint
       - name: Build
+        id: build
         run: npm run build
       - name: Run tests
+        id: jest
         run: npm run test
       - name: E2E tests
+        id: cypress
         uses: cypress-io/github-action@v5
         with:
           command: npm run test:e2e
@@ -48,12 +51,38 @@ jobs:
           wait-on: http://localhost:5000
           headless: true
       - name: Deploy to Render
+        id: deploy
         if: |
           github.event_name == 'push'
           && !contains(env.COMMIT_MESSAGES, '#skip')
         env:
           COMMIT_MESSAGES: ${{ join(github.event.commits.*.message) }}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+      - name: Deployment successful
+        if: |
+          github.event_name == 'push'
+          && !contains(env.COMMIT_MESSAGES, '#skip')
+          && success()
+        uses: rjstone/discord-webhook-notify@v1
+        env:
+          COMMIT_MESSAGES: ${{ join(github.event.commits.*.message) }}
+        with:
+          severity: info
+          details: Deployment Succeeded!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Deployment has failed
+        if: |
+          github.event_name == 'push'
+          && !contains(env.COMMIT_MESSAGES, '#skip')
+          && failure()
+        uses: rjstone/discord-webhook-notify@v1
+        env:
+          COMMIT_MESSAGES: ${{ join(github.event.commits.*.message) }}
+        with:
+          severity: info
+          details: Deployment Succeeded!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          
   tag_release:
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-20.04
