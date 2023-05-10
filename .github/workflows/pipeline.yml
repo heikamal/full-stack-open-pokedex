@@ -48,10 +48,13 @@ jobs:
           wait-on: http://localhost:5000
           headless: true
       - name: Deploy to Render
-        if: ${{ github.event_name == 'push' }} && ${{ !contains(toJSON(github.event.*.message), '#skip') }}
+        if: |
+          ${{ github.event_name == 'push' }} &&
+          ${{ !contains(toJSON(github.event.*.message), '#skip') }}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
   tag_release:
-    if: ${{ github.event_name == 'push' }} && ${{ !contains(toJSON(github.event.*.message), '#skip') }}
+    if: |
+      ${{ github.event_name == 'push' && !contains(toJSON(github.event.*.message), '#skip') }}
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-20.04
     steps:
