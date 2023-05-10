@@ -1,10 +1,8 @@
 name: Periodic health check
 
 on:
-  push:
-    branches:
-      - master
-
+  schedule:
+    - cron:  '30 14 * * *'
 jobs:
   health_check:
     runs-on: ubuntu-latest
