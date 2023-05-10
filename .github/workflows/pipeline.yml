@@ -52,12 +52,9 @@ jobs:
           github.event.name == 'push'
           && !contains(env.COMMIT_MESSAGES, '#skip')
         env:
-          COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
+          COMMIT_MESSAGES: ${{ join(github.event.commits.*.message) }}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
   tag_release:
-    if: |
-      github.event_name == 'push' 
-      && !contains(toJSON(github.event.*.message), '#skip')
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-20.04
     steps:
@@ -68,9 +65,13 @@ jobs:
 
       - name: Bump version and push tag
         uses: anothrNick/github-tag-action@1.61.0
+        if: |
+          github.event_name == 'push' 
+          && !contains(env.COMMIT_MESSAGES, '#skip')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PATCH_STRING_TOKEN: true
           WITH_V: true
           DEFAULT_BUMP: patch
           RELEASE_BRANCHES: master
+          COMMIT_MESSAGES: ${{ join(github.event.commits.*.message) }}
